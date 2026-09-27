@@ -1,0 +1,245 @@
+<div class="page">
+  <!-- Header -->
+  <header class="header">
+    <div>
+      <p class="eyebrow">CAREER DASHBOARD</p>
+      <h1>Job Application Tracker</h1>
+      <p class="subtitle">Keep track of your applications, interviews, and career progress.</p>
+    </div>
+  </header>
+
+  <!-- Stats -->
+  <section class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon blue">📋</div>
+      <div>
+        <span class="stat-label">Total Applications</span>
+        <strong>{{ applications.length }}</strong>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon purple">◷</div>
+      <div>
+        <span class="stat-label">Interviews</span>
+        <strong>
+          {{ applications.filter((a) => a.status === 'Interview').length }}
+        </strong>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon green">✓</div>
+      <div>
+        <span class="stat-label">Offers</span>
+        <strong>
+          {{ applications.filter((a) => a.status === 'Offer').length }}
+        </strong>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon orange">↗</div>
+      <div>
+        <span class="stat-label">In Progress</span>
+        <strong>
+          {{
+            applications.filter((a) => a.status === 'Applied' || a.status === 'Screening').length
+          }}
+        </strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- Form Card -->
+  <section class="form-card">
+    <div class="section-heading">
+      <div>
+        <h2>{{ editingId ? 'Edit Application' : 'Add Application' }}</h2>
+        <p>
+          {{
+            editingId
+              ? 'Update the details of this application.'
+              : 'Add a new job application to your tracker.'
+          }}
+        </p>
+      </div>
+
+      <button *ngIf="editingId" type="button" class="cancel-btn" (click)="resetForm()">
+        Cancel
+      </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="app-form">
+      <div class="form-group">
+        <label for="company">Company</label>
+        <input id="company" formControlName="company" placeholder="e.g. Microsoft" />
+      </div>
+
+      <div class="form-group">
+        <label for="role">Role</label>
+        <input id="role" formControlName="role" placeholder="e.g. Software Engineer" />
+      </div>
+
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select id="status" formControlName="status">
+          <option *ngFor="let s of statuses" [value]="s">
+            {{ s }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="applied_date">Applied Date</label>
+        <input id="applied_date" formControlName="applied_date" type="date" />
+      </div>
+
+      <div class="form-group">
+        <label for="ctc_discussed">CTC Discussed</label>
+        <input id="ctc_discussed" formControlName="ctc_discussed" placeholder="e.g. 12 LPA" />
+      </div>
+
+      <div class="form-group notes-group">
+        <label for="notes">Notes</label>
+        <textarea
+          id="notes"
+          formControlName="notes"
+          placeholder="Interview notes, recruiter details, next steps..."
+          rows="3"
+        ></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button *ngIf="editingId" type="button" class="secondary-btn" (click)="resetForm()">
+          Cancel
+        </button>
+
+        <button type="submit" class="primary-btn">
+          {{ editingId ? 'Update Application' : 'Add Application' }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Applications -->
+  <section class="applications-card">
+    <div class="section-heading">
+      <div>
+        <h2>Your Applications</h2>
+        <p>Track the current status of your job applications.</p>
+      </div>
+
+      <span class="application-count">
+        {{ applications.length }}
+        {{ applications.length === 1 ? 'application' : 'applications' }}
+      </span>
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state" *ngIf="applications.length === 0">
+      <div class="empty-icon">📁</div>
+      <h3>No applications yet</h3>
+      <p>Add your first job application using the form above.</p>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrapper" *ngIf="applications.length > 0">
+      <table class="app-table">
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Applied Date</th>
+            <th>CTC</th>
+            <th>Notes</th>
+            <th class="actions-column">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let app of applications">
+            <td>
+              <div class="company-cell">
+                <div class="company-avatar">
+                  {{ app.company.charAt(0).toUpperCase() }}
+                </div>
+
+                <div>
+                  <strong>{{ app.company }}</strong>
+                </div>
+              </div>
+            </td>
+
+            <td>
+              <span class="role">{{ app.role }}</span>
+            </td>
+
+            <td>
+              <span
+                class="status"
+                [ngClass]="{
+                  'status-applied': app.status === 'Applied',
+                  'status-screening': app.status === 'Screening',
+                  'status-interview': app.status === 'Interview',
+                  'status-offer': app.status === 'Offer',
+                  'status-rejected': app.status === 'Rejected',
+                }"
+              >
+                <span class="status-dot"></span>
+                {{ app.status }}
+              </span>
+            </td>
+
+            <td>
+              <span class="date">
+                {{ app.applied_date | date: 'MMM d, yyyy' }}
+              </span>
+            </td>
+
+            <td>
+              <span class="ctc">
+                {{ app.ctc_discussed || '—' }}
+              </span>
+            </td>
+
+            <td>
+              <span class="notes">
+                {{ app.notes || '—' }}
+              </span>
+            </td>
+
+            <td>
+              <div class="actions">
+                <button
+                  type="button"
+                  class="icon-btn edit-btn"
+                  title="Edit application"
+                  (click)="onEdit(app)"
+                >
+                  ✎
+                </button>
+
+                <button
+                  type="button"
+                  class="icon-btn delete-btn"
+                  title="Delete application"
+                  (click)="onDelete(app.id!)"
+                >
+                  🗑
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <span>Job Tracker</span>
+    <span>•</span>
+    <span>{{ applications.length }} applications tracked</span>
+  </footer>
+</div>
